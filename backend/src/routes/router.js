@@ -1,7 +1,9 @@
-const router = require('express').Router();
+const router = require("express").Router();
 
+// Users routes
 
-// You can require and use your routes here ;)
+// router.use(require('./user'));
 
+router.use(require("./course"));
 
 module.exports = router;
