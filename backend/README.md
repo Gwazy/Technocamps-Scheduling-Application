@@ -1,10 +1,10 @@
-# generated_backend
+# backend
 
 ## Setup
 
 1. Go to project folder
 
-> cd generated_backend
+> cd backend
 
 2. Install Dependencies
 
