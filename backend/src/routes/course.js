@@ -9,7 +9,7 @@ router.get("/api/courses", course.getCourses);
 
 router.post("/api/courses", course.newCourse);
 
-router.delete("/courses/:id", course.deleteCourse);
+router.delete("api//courses/:id", course.deleteCourse);
 
 router.put("/api/courses", course.updateCourse);
 
