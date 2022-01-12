@@ -23,19 +23,18 @@ module.exports = {
     res.json({ status: true, message: "Returning courses", data });
   },
   async newCourse(req, res) {
-    if (!has(req.params, ["name", "capacity"]))
+    if (!req.body.name || !req.body.capacity)
       throw {
         code: status.BAD_REQUEST,
-        message: "You must specify the name and capacity",
+        message: "Need params 'name' and 'capacity'",
       };
     let { name, capacity } = req.body;
-
     await courseModel.create({ name, capacity });
 
-    res.json({ status: true, message: "Course added" });
+    res.json({ status: true, message: "Successfully created course" });
   },
   async updateCourse(req, res) {
-    if (!has(req.body, ["id", "name", "capacity"]))
+    if (!req.body.id || !req.body.name || !req.body.capacity)
       throw {
         code: status.BAD_REQUEST,
         message: "You must specify the id, name and capacity",

@@ -61,7 +61,7 @@ const assertDatabaseConnection = async () => {
   console.log("Checking database connection...");
 
   try {
-    await sequelize.sync({ force: true });
+    // await sequelize.sync({ force: true });
     await sequelize.authenticate();
     console.log("Database connection successful !");
   } catch (error) {

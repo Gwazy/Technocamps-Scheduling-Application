@@ -6,7 +6,9 @@ const router = require("express").Router();
 
 router.use(require("./course"));
 
-// router.use(require("./user"));
+router.use(require("./apiRoutes"));
+
+router.use(require("./user"));
 
 // router.use(require("./institution"));
 

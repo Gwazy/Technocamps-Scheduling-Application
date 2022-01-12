@@ -1,0 +1,12 @@
+GET http://localhost:8000/api/courses
+
+###
+
+
+POST http://localhost:8000/api/courses
+
+{
+    "name": "Hello",
+    "capacity": "2",
+}
+
