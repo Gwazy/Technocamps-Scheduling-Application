@@ -1,68 +1,72 @@
+import { Avatar } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import {
-  Nav,
-  Navbar,
-  Container,
-  NavDropdown,
-  NavItem,
-  Form,
-} from "react-bootstrap";
-import LoginBox from "../Componets/Login/LoginBox";
-import LoginButton from "../Componets/Login/LoginButton";
+import { Nav, Navbar, Container, Button, Form } from "react-bootstrap";
 
 import "./Navbar.scss";
+const axios = require("axios");
+const backendApi = "http://localhost:8000/api";
 
-const NavbarComponent = () => {
-  const [loginStatus, toggleLogin] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem("token") === null) {
-      toggleLogin(false);
-    } else {
-      toggleLogin(true);
-    }
-  }, []);
-
-  const handleLogout = (e) => {
-    localStorage.removeItem("token");
-    window.location.reload();
+const NavbarComponent = (props) => {
+  const handleLogout = () => {
+    axios
+      .post(backendApi + "/logout")
+      .then((response) => {
+        if (response.status === 200) {
+          window.location.reload();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
-  const DisplayLogin = (props) => {
-    if (!loginStatus) {
+  const LoginStatus = () => {
+    if (props.user ? 1 : 0) {
       return (
-        <Nav
-          style={{
-            visibility: props.visability === "false" ? "hidden" : "inherited",
-          }}
-        >
-          <LoginBox></LoginBox>
-          <LoginButton></LoginButton>
-        </Nav>
+        <Form inline>
+          <Nav.Link>{props.user.username}</Nav.Link>
+          <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+        </Form>
+      );
+    } else {
+      return (
+        <Form inline>
+          <Button variant="primary" href="/login">
+            Login
+          </Button>
+          <Button variant="primary" href="/register">
+            Register
+          </Button>
+        </Form>
       );
     }
+  };
 
-    return (
-      <Nav>
-        <Nav.Link href="/" onClick={handleLogout}>
-          Logout
-        </Nav.Link>
-        <Nav.Link href="/profile">My Account</Nav.Link>
-        <Nav.Link href="/rooms">Rooms</Nav.Link>
-      </Nav>
-    );
+  const LoginRoles = () => {
+    if (props.user.isAdmin) {
+      return (
+        <div>
+          <Form inline>
+            <Button variant="primary" href="/course">
+              Course
+            </Button>
+          </Form>
+        </div>
+      );
+    }
+    if (!props.user.isAdmin) {
+      return <Nav>My Bookings</Nav>;
+    } else {
+      return <div></div>;
+    }
   };
 
   return (
-    <Navbar className="nav-bar" bg="light" expand="md">
-      <Container className="flex-container">
-        <DisplayLogin visability="false" />
-
-        <Navbar.Brand id="resize" className="center">
-          Technocamps
-        </Navbar.Brand>
-
-        <DisplayLogin />
+    <Navbar bg="light" className="nav-bar" expand="lg">
+      <Container>
+        <Navbar.Brand href="/">Technocamps</Navbar.Brand>
+        <LoginRoles />
+        <LoginStatus />
       </Container>
     </Navbar>
   );

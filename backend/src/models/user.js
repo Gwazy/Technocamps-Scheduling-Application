@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
-      // define association here
+    static associate({ Entries }) {
+      this.hasMany(Entries, { foreignKey: "userId", as: "entries" });
     }
   }
   User.init(
@@ -47,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
       password: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
       },
     },
     {

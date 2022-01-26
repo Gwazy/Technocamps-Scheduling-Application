@@ -11,7 +11,7 @@ module.exports = {
 
     let { id } = req.params;
 
-    let data = await userModel.findOne({ where: { id } });
+    let data = await userModel.findOne({ where: { id }, include: "entries" });
 
     if (!data) throw { code: status.BAD_REQUEST, message: "User not found" };
 
@@ -23,13 +23,36 @@ module.exports = {
     res.json({ status: true, message: "Returning users", data });
   },
   async newUser(req, res) {
-    if (!req.body.name || !req.body.capacity)
-      throw {
-        code: status.BAD_REQUEST,
-        message: "Need params 'name' and 'capacity'",
-      };
-    let { name, capacity } = req.body;
-    await userModel.create({ name, capacity });
+    if (!req.body.username) {
+      throw { code: status.BAD_REQUEST, message: "Missing parameters" };
+    }
+
+    let {
+      username,
+      emailaddress,
+      firstname,
+      surname,
+      address,
+      postcode,
+      phonenumber,
+      password,
+    } = req.body;
+
+    try {
+      password = bcrypt.hashSync(password, 10); //hashSync required
+      await userModel.create({
+        username,
+        emailaddress,
+        firstname,
+        surname,
+        address,
+        postcode,
+        phonenumber,
+        password,
+      });
+    } catch (err) {
+      throw { code: status.BAD_REQUEST, message: err };
+    }
 
     res.json({ status: true, message: "Successfully created user" });
   },

@@ -17,7 +17,7 @@ const CalenderPicker = (props) => {
   };
 
   return (
-    <div>
+    <div className="mb-3">
       {/* Usage of the Calender componet */}
       <DatePicker
         className="calenderColour"

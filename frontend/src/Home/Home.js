@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Jumbotron from "../Jumbotron/Jumbotron";
-import Navbar from "../Navbar/Navbar";
+
 import { Col, Row, Container } from "react-bootstrap";
 import Calender from "../Calender/Calender";
 
@@ -24,9 +24,7 @@ const Home = () => {
   return (
     <div>
       <Container fluid>
-        <Row>
-          <Navbar></Navbar>
-        </Row>
+        <Row></Row>
         <Row>
           <Jumbotron sharedDateObj={DateObject} setDate={setDate}></Jumbotron>
         </Row>

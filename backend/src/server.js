@@ -36,7 +36,13 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(logger.dev, logger.combined);
 
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(helmet());
 
 // This middleware adds the json header to every response
