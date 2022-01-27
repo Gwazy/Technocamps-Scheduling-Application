@@ -1,8 +1,23 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+const axios = require("axios");
+const backendApi = "http://localhost:8000/api";
 
 const NewCourse = (props) => {
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    name: "",
+    capacity: "",
+  });
+
+  const [error, setError] = useState(false);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setData((data) => ({
+      ...data,
+      [id]: value,
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,7 +39,7 @@ const NewCourse = (props) => {
           }
         }
       })
-      .catch((e) => console.log(e));
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -48,9 +63,10 @@ const NewCourse = (props) => {
               type="name"
               placeholder="Name"
               id="name"
-              onChange={null}
+              onChange={handleChange}
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Capacity</Form.Label>
             <Form.Control
@@ -58,7 +74,7 @@ const NewCourse = (props) => {
               placeholder="30"
               id="capacity"
               defaultValue={data.capacity}
-              onChange={null}
+              onChange={handleChange}
             />
           </Form.Group>
         </Form>

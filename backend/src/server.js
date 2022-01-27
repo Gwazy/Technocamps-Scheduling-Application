@@ -38,8 +38,18 @@ app.use(logger.dev, logger.combined);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST"],
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: [
+      "Access-Control-Allow-Origin",
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
     credentials: true,
   })
 );

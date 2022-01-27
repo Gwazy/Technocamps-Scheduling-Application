@@ -3,20 +3,9 @@ import { Modal, Button, Form } from "react-bootstrap";
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
-const NewEvent = (props) => {
+const EditCourse = (props) => {
   const [data, setData] = useState({});
   const [error, setError] = useState(false);
-
-  if (props.date.hour < 12) {
-    props.date.time = "AM";
-    props.date.time2 = "AM";
-    if (props.date.hour === 11) {
-      props.date.time2 = "PM";
-    }
-  } else {
-    props.date.time = "PM";
-    props.date.time2 = "PM";
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -49,23 +38,19 @@ const NewEvent = (props) => {
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">Book Event</Modal.Title>
+        <Modal.Title id="contained-modal-title-vcenter">
+          Edit Course
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h4>
-          {props.date.day}/{props.date.month + 1}/{props.date.year} <br></br>
-          {props.date.hour}
-          {props.date.time} - {props.date.hour + 1}
-          {props.date.time2}
-        </h4>
+        <h4></h4>
         <Form className="login-form">
           <Form.Group className="pt-3 mb-3">
-            <Form.Label>Course </Form.Label>
+            <Form.Label>Course Name</Form.Label>
             <Form.Control
-              type="course"
-              placeholder="Course"
-              id="course"
-              defaultValue={data.course}
+              type="name"
+              placeholder="Name"
+              id="name"
               onChange={null}
             />
           </Form.Group>
@@ -79,15 +64,6 @@ const NewEvent = (props) => {
               onChange={null}
             />
           </Form.Group>
-          <Form.Group>
-            <Form.Label>Online</Form.Label>
-            <Form.Check
-              type="checkbox"
-              id="online"
-              defaultValue={data.online}
-              onChange={null}
-            />
-          </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -98,4 +74,4 @@ const NewEvent = (props) => {
   );
 };
 
-export default NewEvent;
+export default EditCourse;
