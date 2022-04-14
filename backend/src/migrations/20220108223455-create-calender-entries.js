@@ -26,6 +26,9 @@ module.exports = {
       confirmation: {
         type: Sequelize.BOOLEAN,
       },
+      pending: {
+        type: Sequelize.BOOLEAN,
+      },
       userID: {
         type: Sequelize.INTEGER,
         allowNull: false,

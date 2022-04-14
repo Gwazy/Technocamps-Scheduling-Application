@@ -1,23 +1,138 @@
 import React from "react";
-import { Button, Form } from "react-bootstrap";
-import { useState } from "react";
+import { Button, Form, Alert } from "react-bootstrap";
+import { useState, useEffect } from "react";
 import { Container } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import "./Register.scss";
+const axios = require("axios");
+const backendApi = "http://localhost:8000/api";
 
 const Register = () => {
   const [data, setData] = useState({
-    forename: "",
+    username: "",
+    emailaddress: "",
+    firstname: "",
     surname: "",
-    email: "",
-    dob: "",
+    address: "",
+    postcode: "",
+    phonenumber: "",
     password: "",
+    isAdmin: "false",
   });
-  const [registered, setRegistered] = useState(false);
 
-  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const [error, setError] = useState([]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError([]);
+    validateInputFields();
+    if (error.length === 0) {
+      axios
+        .post(
+          backendApi + "/register",
+          {
+            username: data.username,
+            emailaddress: data.emailaddress,
+            firstname: data.firstname,
+            surname: data.surname,
+            address: data.address,
+            postcode: data.postcode,
+            phonenumber: data.phonenumber,
+            password: data.password,
+            isAdmin: "false",
+          },
+          { withCredentials: true }
+        )
+        .then((response) => {
+          console.log(response.status);
+
+          if (response.status === 200) {
+            navigate("/");
+          }
+        })
+        .catch((err) => {
+          for (let e of err.response.data.message) {
+            setError((err) => [...err, e]);
+          }
+          console.log(error);
+        });
+    }
+  };
+
+  const validateInputFields = async (_callback) => {
+    if (data.username === "") {
+      setError((err) => [...err, "No input for Username field"]);
+    }
+    if (data.emailaddress === "") {
+      setError((err) => [...err, "No input for Email Address field"]);
+    }
+    if (data.firstname === "") {
+      setError((err) => [...err, "No input for Forename field"]);
+    }
+    if (data.surname === "") {
+      setError((err) => [...err, "No input for Surname field"]);
+    }
+    if (data.address === "") {
+      setError((err) => [...err, "No input for Address field"]);
+    }
+    if (data.emailaddress === "") {
+      setError((err) => [...err, "No input for Phone Number"]);
+    }
+    if (data.password === "") {
+      setError((err) => [...err, "No input for Password field"]);
+    }
+
+    _callback();
+  };
+
+  const onKeyDownNumerical = async (e) => {
+    const re = /^[0-9\b]+$/;
+    if (!re.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const renderError = error.map((err) => <div>{err}</div>);
+
+  const ShowError = () => {
+    if (error != "") {
+      return (
+        <div>
+          <Alert variant="danger">
+            <Alert.Heading>Error</Alert.Heading>
+            {renderError}
+          </Alert>
+        </div>
+      );
+    } else {
+      return <div></div>;
+    }
+  };
+
+  const handleChange = async (e) => {
+    const { id, value } = e.target;
+    const re = /^[0-9\b]+$/;
+
+    if (id === "phonenumber") {
+      if (re.test(value)) {
+        setData((data) => ({
+          ...data,
+          [id]: value,
+        }));
+      }
+    } else {
+      setData((data) => ({
+        ...data,
+        [id]: value,
+      }));
+    }
+  };
 
   return (
-    <Container>
-      <Form className="login-form mt-5">
+    <Container className="control">
+      <ShowError></ShowError>
+      <Form className="mt-5 mb-5">
         <Form.Group>
           <Form.Label>Username</Form.Label>
           <Form.Control
@@ -25,7 +140,7 @@ const Register = () => {
             placeholder="Enter Username"
             id="username"
             defaultValue={data.username}
-            onChange={null}
+            onChange={handleChange}
           ></Form.Control>
 
           <Form.Label>Email Address</Form.Label>
@@ -34,7 +149,7 @@ const Register = () => {
             placeholder="Enter Email"
             id="emailaddress"
             defaultValue={data.emailadress}
-            onChange={null}
+            onChange={handleChange}
           ></Form.Control>
 
           <Form.Text className="text-muted ">
@@ -48,7 +163,7 @@ const Register = () => {
             placeholder="Enter Forename"
             id="firstname"
             defaultValue={data.firstname}
-            onChange={null}
+            onChange={handleChange}
           />
           <Form.Label>Surname</Form.Label>
           <Form.Control
@@ -56,7 +171,7 @@ const Register = () => {
             placeholder="Enter Surname"
             id="surname"
             defaultValue={data.surname}
-            onChange={null}
+            onChange={handleChange}
           />
           <Form.Label>Address</Form.Label>
           <Form.Control
@@ -64,7 +179,7 @@ const Register = () => {
             placeholder="Enter Address"
             id="address"
             defaultValue={data.address}
-            onChange={null}
+            onChange={handleChange}
           />
           <Form.Label>Postcode</Form.Label>
           <Form.Control
@@ -72,15 +187,16 @@ const Register = () => {
             placeholder="Enter Postcode"
             id="postcode"
             defaultValue={data.postcode}
-            onChange={null}
+            onChange={handleChange}
           />
-          <Form.Label>Phonenumber</Form.Label>
+          <Form.Label>Phone Number</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Enter phonenumber"
+            onKeyDown={onKeyDownNumerical}
+            placeholder="Enter phone number"
             id="phonenumber"
             defaultValue={data.phonenumber}
-            onChange={null}
+            onChange={handleChange}
           />
         </Form.Group>
         <Form.Group>
@@ -90,15 +206,14 @@ const Register = () => {
             placeholder="Password"
             id="password"
             defaultValue={data.password}
-            onChange={null}
+            onChange={handleChange}
           />
         </Form.Group>
         <Button
           variant="primary"
           type="button"
           className="mt-3"
-          onClick={null}
-          disabled={data.hasRegistered}
+          onClick={handleSubmit}
         >
           Register
         </Button>

@@ -1,17 +1,18 @@
-import { Avatar } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { Nav, Navbar, Container, Button, Form } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 import "./Navbar.scss";
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
 const NavbarComponent = (props) => {
+  const navigate = useNavigate();
   const handleLogout = () => {
     axios
       .post(backendApi + "/logout")
       .then((response) => {
         if (response.status === 200) {
+          navigate("/");
           window.location.reload();
         }
       })
@@ -43,21 +44,33 @@ const NavbarComponent = (props) => {
   };
 
   const LoginRoles = () => {
+    if (!props.user) {
+      return <div></div>;
+    }
     if (props.user.isAdmin) {
       return (
         <div>
           <Form inline>
-            <Button variant="primary" href="/course">
-              Course
+            <Button variant="none" href="/course">
+              Courses
+            </Button>
+            <Button variant="none" href="/bookings">
+              Bookings
             </Button>
           </Form>
         </div>
       );
     }
     if (!props.user.isAdmin) {
-      return <Nav>My Bookings</Nav>;
-    } else {
-      return <div></div>;
+      return (
+        <div>
+          <Form inline>
+            <Button variant="none" href="/mybooking">
+              My Booking
+            </Button>
+          </Form>
+        </div>
+      );
     }
   };
 

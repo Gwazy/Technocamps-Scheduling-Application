@@ -24,29 +24,36 @@ module.exports = {
     res.json({ status: true, message: "Returning entries", data });
   },
 
+  async getEntriesByUserID(req, res) {
+    let data = await entriesModel.findAll({ include: [User] });
+
+    res.json({ status: true, message: "Returning entries", data });
+  },
   async newEntrie(req, res) {
+    console.log(req.body.online);
     if (
       !req.body.name ||
       !req.body.bookingDate ||
       !req.body.bookingTime ||
-      !req.body.online
+      !req.body.userId ||
+      !req.body.capacity
     )
       throw {
         code: status.BAD_REQUEST,
         message: "Missing parameters",
       };
 
-    let { name, bookingDate, bookingTime, online, confirmation } = req.body;
+    let { name, bookingDate, bookingTime, online, userId, capacity } = req.body;
 
     try {
-      const user = await User.findOne({ where: { id: req.body.id } });
+      const user = await User.findOne({ where: { id: userId } });
 
       await entriesModel.create({
         name,
         bookingDate,
         bookingTime,
         online,
-        confirmation,
+        capacity,
         userId: user.id,
       });
     } catch (error) {
@@ -60,14 +67,14 @@ module.exports = {
   },
 
   async updateEntrie(req, res) {
-    if (!req.body.id || !req.body.name || !req.body.capacity)
+    if (!req.body.id)
       throw {
         code: status.BAD_REQUEST,
-        message: "You must specify the id, name and capacity",
+        message: "You must specify the id",
       };
-    let { id, name, capacity } = req.body;
+    let { id, pending, confirmation } = req.body;
 
-    await entriesModel.updateEntrie({ name, capacity }, { where: { id } });
+    await entriesModel.update({ pending, confirmation }, { where: { id } });
     res.json({ status: true, message: "Entrie updated" });
   },
 

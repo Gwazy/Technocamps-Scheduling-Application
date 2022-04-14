@@ -23,13 +23,13 @@ module.exports = {
     res.json({ status: true, message: "Returning courses", data });
   },
   async newCourse(req, res) {
-    if (!req.body.name || !req.body.capacity)
+    if (!req.body.name || !req.body.capacity || !req.body.description)
       throw {
         code: status.BAD_REQUEST,
-        message: "Need params 'name' and 'capacity'",
+        message: "Need params 'name' and 'capacity' and 'description'",
       };
-    let { name, capacity, visability } = req.body;
-    await courseModel.create({ name, capacity, visability });
+    let { name, capacity, visability, description } = req.body;
+    await courseModel.create({ name, description, capacity, visability });
 
     res.json({ status: true, message: "Successfully created course" });
   },
@@ -37,9 +37,9 @@ module.exports = {
     if (!req.body.id)
       throw { code: status.BAD_REQUEST, message: "You must specify the id" };
 
-    let { id, name, capacity, visability } = req.body;
+    let { id, name, description, capacity, visability } = req.body;
     await courseModel
-      .update({ name, capacity, visability }, { where: { id } })
+      .update({ name, description, capacity, visability }, { where: { id } })
       .then(res.json({ status: true, message: "Course updated" }))
       .catch((err) => res.json(err));
   },
@@ -49,7 +49,7 @@ module.exports = {
 
     let { id } = req.params;
 
-    await courseModel.destory({ where: { id } });
+    await courseModel.destroy({ where: { id } });
 
     res.json({ status: true, message: "Course deleted" });
   },

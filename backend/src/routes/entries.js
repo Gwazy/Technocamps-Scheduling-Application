@@ -6,7 +6,9 @@ const entries = require("../controllers/entries.js");
 
 router.get("/api/entries/:id", entries.getEntrieById);
 
-router.get("/api/entries", validateToken, entries.getEntries);
+router.get("/api/entries/user/:id", entries.getEntriesByUserID);
+
+router.get("/api/entries", entries.getEntries);
 
 router.post("/api/entries", entries.newEntrie);
 

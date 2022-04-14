@@ -8,10 +8,20 @@ const bcrypt = require("bcrypt");
 
 module.exports = {
   async register(req, res) {
-    if (!req.body.username) {
-      throw { code: status.BAD_REQUEST, message: "Missing parameters" };
+    if (
+      !req.body.username ||
+      !req.body.emailaddress ||
+      !req.body.firstname ||
+      !req.body.surname ||
+      !req.body.address ||
+      !req.body.postcode ||
+      !req.body.phonenumber ||
+      !req.body.password
+    ) {
+      throw { code: status.BAD_REQUEST, message: "" };
     }
 
+    const error = [];
     let {
       username,
       emailaddress,
@@ -24,24 +34,74 @@ module.exports = {
       isAdmin,
     } = req.body;
 
+    // Validation
+
     try {
-      password = bcrypt.hashSync(password, 10); //hashSync required
-      await userModel.create({
-        username,
-        emailaddress,
-        firstname,
-        surname,
-        address,
-        postcode,
-        phonenumber,
-        password,
-        isAdmin,
+      let doesUsernameExist = await userModel.findOne({
+        where: { username: username },
       });
-    } catch (error) {
-      throw { code: status.BAD_REQUEST, message: error };
+
+      if (doesUsernameExist) {
+        error.push("Username already exists!");
+      }
+    } catch (err) {
+      error.push("Username already exists!");
     }
 
-    res.json({ status: true, message: "Successfully created user" });
+    try {
+      let doesEmailaddressExist = await userModel.findOne({
+        where: { emailaddress: emailaddress },
+      });
+      if (doesEmailaddressExist) {
+        error.push("This emailaddress is already used!");
+      }
+    } catch (err) {
+      error.push("This emailaddress is already used!");
+    }
+
+    try {
+      let re = /^[0-9\b]+$/;
+      if (!re.test(phonenumber)) {
+        error.push("Please enter a valid phone number!");
+      }
+    } catch (err) {
+      error.push("Please enter a valid phone number!");
+    }
+
+    try {
+      let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
+      if (!re.test(emailaddress)) {
+        error.push("Please enter a valid email address!");
+      }
+    } catch (err) {
+      error.push("Please enter a valid email address!");
+    }
+
+    if (error.length != 0) {
+      console.log(error.length);
+      // throw { code: status.BAD_REQUEST, message: error };
+      res.status(400).json({ status: 400, message: error });
+    }
+
+    if (error.length === 0) {
+      try {
+        password = bcrypt.hashSync(password, 10); //hashSync required
+        await userModel.create({
+          username,
+          emailaddress,
+          firstname,
+          surname,
+          address,
+          postcode,
+          phonenumber,
+          password,
+          isAdmin,
+        });
+        res.json({ status: true, message: "Successfully created user" });
+      } catch (error) {
+        throw { code: status.BAD_REQUEST, message: "error" };
+      }
+    }
   },
 
   async login(req, res) {
@@ -57,18 +117,15 @@ module.exports = {
       if (!user) {
         throw { code: status.BAD_REQUEST, message: "User not found" };
       }
-
       if (!bcrypt.compareSync(password, user.password)) {
         throw {
           code: status.BAD_REQUEST,
           message: "Invalid name or password",
         };
       }
-
       const accessToken = createTokens(user);
-
       res.cookie("access-token", accessToken, {
-        maxAge: 60 * 60 * 24 * 30 * 1000,
+        maxAge: 2592000000,
         httpOnly: true,
       });
 
@@ -76,7 +133,6 @@ module.exports = {
         status: true,
         message: "Authentication Successful",
         accesstoken: accessToken,
-        userid: user.id,
       });
     } catch (error) {
       throw {

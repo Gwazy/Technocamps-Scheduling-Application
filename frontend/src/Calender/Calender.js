@@ -7,17 +7,19 @@ const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
 const Calender = (props) => {
-  const currentDate = new Date();
+  const initialDate = props.sharedDateObj.constantInitialDate;
+  const currentDate = props.sharedDateObj.currentDate;
 
   const [date, setDate] = useState([
     { day: "", month: "", year: "", hour: "" },
   ]);
+
   const [modalShow, setModalShow] = useState(false);
   const [events, setEvents] = useState({
-    id: "id",
-    title: "title",
-    start: new Date(),
-    end: new Date(),
+    id: "",
+    title: "",
+    start: "",
+    end: "",
   });
 
   const fetchData = () => {
@@ -107,7 +109,8 @@ const Calender = (props) => {
             const block = day.getDay();
             const days = day.getDate();
             const noClick = day.getDay() === 2 && start.getHours === 10;
-            const disabled = block === 1;
+            // const disabled = block === 1;
+            const disabled = false;
 
             return (
               <Button
@@ -137,6 +140,8 @@ const Calender = (props) => {
 
       <NewEvent
         date={date}
+        user={props.user}
+        initialdate={initialDate}
         show={modalShow}
         onHide={() => setModalShow(false)}
       />
