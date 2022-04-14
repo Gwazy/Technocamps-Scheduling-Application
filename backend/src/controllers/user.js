@@ -23,7 +23,16 @@ module.exports = {
     res.json({ status: true, message: "Returning users", data });
   },
   async newUser(req, res) {
-    if (!req.body.username) {
+    if (
+      !req.body.username ||
+      !req.body.emailaddress ||
+      !req.body.firstname ||
+      !req.body.surname ||
+      !req.body.address ||
+      !req.body.postcode ||
+      !req.body.phonenumber ||
+      !req.body.password
+    ) {
       throw { code: status.BAD_REQUEST, message: "Missing parameters" };
     }
 
@@ -38,21 +47,7 @@ module.exports = {
       password,
     } = req.body;
 
-    try {
-      password = bcrypt.hashSync(password, 10); //hashSync required
-      await userModel.create({
-        username,
-        emailaddress,
-        firstname,
-        surname,
-        address,
-        postcode,
-        phonenumber,
-        password,
-      });
-    } catch (err) {
-      throw { code: status.BAD_REQUEST, message: err };
-    }
+    // Creating User
 
     res.json({ status: true, message: "Successfully created user" });
   },

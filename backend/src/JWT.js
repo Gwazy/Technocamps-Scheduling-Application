@@ -21,9 +21,9 @@ const validateToken = (req, res, next) => {
       if (err) {
         return err;
       }
+      req.authenticated = true;
       req.username = decoded.username;
       req.id = decoded.id;
-      req.authenticated = true;
       req.isAdmin = decoded.isAdmin;
       return next();
     });
