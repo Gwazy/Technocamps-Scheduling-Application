@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       // this.hasOne(Course, { foreignKey: "courseId" });
       this.belongsTo(User, { foreignKey: "userId" });
+      this.belongsTo(User, { foreignKey: "userId", as: "staffId" });
     }
   }
   Entries.init(
@@ -34,6 +35,10 @@ module.exports = (sequelize, DataTypes) => {
       capacity: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      calendarId: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       confirmation: {
         type: DataTypes.BOOLEAN,

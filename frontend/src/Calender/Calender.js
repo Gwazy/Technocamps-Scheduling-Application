@@ -1,151 +1,175 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@mui/material";
 import { Scheduler } from "@aldabil/react-scheduler";
 import { EVENTS } from "./events";
 import NewEvent from "../Components/Modal/NewEvent";
+import { Alert, Container } from "react-bootstrap";
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
 const Calender = (props) => {
   const initialDate = props.sharedDateObj.constantInitialDate;
   const currentDate = props.sharedDateObj.currentDate;
+  const [toggle, setToggle] = useState(true);
+  const didMount = useRef(false);
 
   const [date, setDate] = useState([
     { day: "", month: "", year: "", hour: "" },
   ]);
-
+  const [entriesData, setEntriesData] = useState([]);
   const [modalShow, setModalShow] = useState(false);
-  const [events, setEvents] = useState({
-    id: "",
-    title: "",
-    start: "",
-    end: "",
-  });
+  const [successfulBooking, setSuccessfulBooking] = useState(false);
 
-  const fetchData = () => {
-    axios.defaults.withCredentials = true;
+  useEffect(() => {
+    if (didMount) {
+      setEntriesData([]);
+      axios.defaults.withCredentials = true;
 
-    axios
-      .get(backendApi + "/entries")
-      .then((response) => {
-        if (response.status === 400) {
-          console.log("User not logged in");
-        }
-        if (response.status === 200) {
-          console.log("User logged in");
-          let eventList = response.data.data;
-          console.log(eventList);
-          for (let event of eventList) {
-            // console.log(event.id);
-            // console.log(event.name);
-            // console.log(event.bookingDate);
-            // console.log(event.bookingTime);
-            setEvents((events) => [...events]);
-            console.log(events);
+      axios
+        .get(backendApi + "/entries/")
+        .then((response) => {
+          if (response.status === 200) {
+            let listOfEntries = response.data.data;
+
+            for (let entrie of listOfEntries) {
+              setEntriesData((entriesData) => [...entriesData, entrie]);
+            }
           }
-          console.log(events);
-          return events;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      didMount = true;
+    }
+  }, [toggle]);
+
+  useEffect(() => {
+    if (successfulBooking) {
+      const interval = setInterval(() => {
+        setSuccessfulBooking(false);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [successfulBooking]);
+
+  const isDisabled = (day, start, elements) => {
+    var bookingDate = new Date(
+      day.getMonth() + 1 + " " + day.getDate() + " " + day.getFullYear()
+    );
+
+    bookingDate.setHours(0, 0, 0, 0);
+    if (initialDate > bookingDate) {
+      return true;
+    } else {
+      for (let ele in entriesData) {
+        let tempDate = new Date(entriesData.at(ele).bookingDate);
+        tempDate.setHours(0, 0, 0, 0);
+        if (tempDate.toString() === bookingDate.toString()) {
+          let tempTime = entriesData.at(ele).bookingTime;
+          if (
+            Number(tempTime) === Number(start.getHours()) &&
+            !elements.includes(tempTime)
+          ) {
+            elements.push(tempTime);
+            return true;
+          }
         }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    return events;
+      }
+      return false;
+    }
+  };
+
+  const onHideClick = () => {
+    setModalShow(false);
+  };
+
+  const onSuccessfulBooking = () => {
+    setSuccessfulBooking(true);
+    setModalShow(false);
+    setToggle(!toggle);
+  };
+
+  const SuccessMessage = () => {
+    if (successfulBooking) {
+      return (
+        <div>
+          <Alert variant="success">
+            <Alert.Heading>Success</Alert.Heading>
+            <p>You have successfully created a booking!</p>
+          </Alert>
+        </div>
+      );
+    } else {
+      return <div></div>;
+    }
   };
 
   return (
-    <div className="mt-4 mb-4">
-      <Scheduler
-        selectedDate={currentDate}
-        view="week"
-        month={null}
-        // remoteEvents={fetchData}
-        events={EVENTS}
-        day={null}
-        // day={{
-        //   startHour: 8,
-        //   endHour: 16,
-        //   step: 60,
-        //   cellRenderer: ({ day, start }) => {
-        //     // Fake some condition up
-        //     const block = day.getDay();
-        //     const noClick = day.getDay() === 2 && start.getHours === 10;
-        //     const disabled = block === 1;
-        //     return (
-        //       <Button
-        //         style={{
-        //           height: "100%",
-        //           background: disabled ? "#fff" : "transparent",
-        //         }}
-        //         onClick={() => {
-        //           if (!disabled) {
-        //             setDate({
-        //               day: day.getDate(),
-        //               month: day.getMonth(),
-        //               year: day.getFullYear(),
-        //               hour: start.getHours(),
-        //             });
-        //           }
-        //           if (noClick) {
-        //             console.log("No Click");
-        //             return null;
-        //           }
-        //           console.log(date);
-        //         }}
-        //         disableRipple={disabled}
-        //         // disabled={disabled}
-        //       ></Button>
-        //     );
-        //   },
-        // }}
-        week={{
-          weekDays: [0, 1, 2, 3, 4],
-          weekStartOn: 1,
-          startHour: 8,
-          endHour: 16,
-          step: 60,
-          cellRenderer: ({ day, start }) => {
-            // Fake some condition up
-            const block = day.getDay();
-            const days = day.getDate();
-            const noClick = day.getDay() === 2 && start.getHours === 10;
-            // const disabled = block === 1;
-            const disabled = false;
+    <Container>
+      <SuccessMessage></SuccessMessage>
 
-            return (
-              <Button
-                style={{
-                  height: "100%",
-                  background: disabled ? "#fff" : "transparent",
-                }}
-                onClick={() => {
-                  if (!disabled) {
-                    setDate({
-                      day: day.getDate(),
-                      month: day.getMonth(),
-                      year: day.getFullYear(),
-                      hour: start.getHours(),
-                    });
-                    setModalShow(true);
-                  }
-                  console.log(start.getHours());
-                }}
-                disableRipple={disabled}
-                // disabled={disabled}
-              ></Button>
-            );
-          },
-        }}
-      />
+      <div className="mt-4 mb-4">
+        <Scheduler
+          selectedDate={currentDate}
+          view="week"
+          month={null}
+          events={EVENTS}
+          day={null}
+          week={{
+            weekDays: [0, 1, 2, 3, 4],
+            weekStartOn: 1,
+            startHour: 8,
+            endHour: 16,
+            step: 60,
+            cellRenderer: ({ day, start }) => {
+              // Fake some condition up
+              const elements = [];
+              const disabled = isDisabled(day, start, elements);
 
-      <NewEvent
-        date={date}
-        user={props.user}
-        initialdate={initialDate}
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-      />
-    </div>
+              return (
+                <Button
+                  style={{
+                    height: "100%",
+
+                    background: disabled ? "#E5E5E5" : "transparent",
+                  }}
+                  onClick={() => {
+                    if (!disabled) {
+                      setDate({
+                        day: day.getDate(),
+                        month: day.getMonth(),
+                        year: day.getFullYear(),
+                        hour: start.getHours(),
+                      });
+                      setModalShow(true);
+                    } else {
+                      setDate({
+                        day: 10,
+                        month: 1,
+                        year: 2000,
+                        hour: start.getHours(),
+                      });
+                      setModalShow(true);
+                    }
+                  }}
+                  // disabled={disabled}
+                ></Button>
+              );
+            },
+          }}
+        />
+
+        <NewEvent
+          date={date}
+          user={props.user}
+          initialdate={initialDate}
+          show={modalShow}
+          onHide={() => onHideClick()}
+          onCompleted={() => onSuccessfulBooking()}
+        />
+      </div>
+    </Container>
   );
 };
 

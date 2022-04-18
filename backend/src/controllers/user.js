@@ -1,6 +1,6 @@
 const status = require("http-status");
 
-const { User } = require("../models");
+const { User, Entries } = require("../models");
 const userModel = User;
 const has = require("has-keys");
 
@@ -18,39 +18,11 @@ module.exports = {
     res.json({ status: true, message: "Returning User", data });
   },
   async getUsers(req, res) {
-    let data = await userModel.findAll();
+    let data = await userModel.findAll({ include: [entries] });
 
     res.json({ status: true, message: "Returning users", data });
   },
-  async newUser(req, res) {
-    if (
-      !req.body.username ||
-      !req.body.emailaddress ||
-      !req.body.firstname ||
-      !req.body.surname ||
-      !req.body.address ||
-      !req.body.postcode ||
-      !req.body.phonenumber ||
-      !req.body.password
-    ) {
-      throw { code: status.BAD_REQUEST, message: "Missing parameters" };
-    }
-
-    let {
-      username,
-      emailaddress,
-      firstname,
-      surname,
-      address,
-      postcode,
-      phonenumber,
-      password,
-    } = req.body;
-
-    // Creating User
-
-    res.json({ status: true, message: "Successfully created user" });
-  },
+  async newUser(req, res) {},
   async updateUser(req, res) {
     if (!req.body.id || !req.body.name || !req.body.capacity)
       throw {

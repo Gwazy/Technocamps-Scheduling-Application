@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import Select from "react-select";
 import "./NewEvent.scss";
 
 const axios = require("axios");
@@ -8,11 +9,8 @@ const backendApi = "http://localhost:8000/api";
 const NewEvent = (props) => {
   const [error, setError] = useState(false);
   const [courseList, setCourseList] = useState([]);
+  const [max, setMax] = useState(20);
   const [data, setData] = useState({
-    name: "Example Course 1",
-    bookingDate:
-      props.date.month + 1 + "/" + props.date.day + "/" + props.date.year,
-    bookingTime: props.date.hour,
     online: false,
     capacity: "5",
     userId: props.user.id,
@@ -34,18 +32,20 @@ const NewEvent = (props) => {
   );
 
   useEffect(() => {
+    setCourseList([]);
+
     axios
       .get(backendApi + "/courses")
       .then((response) => {
         if (response.status === 200) {
-          setCourseList([]);
           let listOfCourses = response.data.data;
 
           for (let course of listOfCourses) {
-            setCourseList((courseList) => [...courseList, course]);
+            if (!course.visability) {
+              setCourseList((courseList) => [...courseList, course]);
+            }
           }
         }
-        console.log(courseList);
       })
       .catch((error) => {
         console.log(error);
@@ -54,11 +54,14 @@ const NewEvent = (props) => {
 
   //  Allows for updating useState constantly
   useEffect(() => {
-    console.log(data);
+    console.log("data");
   }, [data]);
 
   const onKeyDown = async (e) => {
     const re = /^[0-9\b]+$/;
+    if (e.key == "Backspace") {
+      return;
+    }
     if (!re.test(e.key)) {
       e.preventDefault();
     }
@@ -70,38 +73,50 @@ const NewEvent = (props) => {
 
     if (id === "capacity") {
       if (re.test(value)) {
-        setData((data) => ({
-          ...data,
-          [id]: value,
-        }));
+        if (value > max) {
+          setData((data) => ({
+            ...data,
+            [id]: max,
+          }));
+        } else {
+          setData((data) => ({
+            ...data,
+            [id]: value,
+          }));
+        }
       }
     } else {
       setData((data) => ({
         ...data,
-        [id]: value,
+        [id]: !data.online,
       }));
     }
-    //console.log(data);
+    console.log(data);
+  };
+
+  const handleChangeSelect = (e) => {
+    const value = e.label;
+    const capacity = e.capacity;
+    setMax(capacity);
+    setData((data) => ({
+      ...data,
+      name: value,
+    }));
+
+    console.log(data);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setData({
-      name: "Example Course 1",
-      bookingDate:
-        props.date.month + 1 + "/" + props.date.day + "/" + props.date.year,
-      bookingTime: props.date.hour,
-      online: false,
-      capacity: "5",
-      userId: props.user.id,
-    });
+
     axios
       .post(
         backendApi + "/entries",
         {
           name: data.name,
-          bookingDate: data.bookingDate,
-          bookingTime: data.bookingTime,
+          bookingDate:
+            props.date.month + 1 + "/" + props.date.day + "/" + props.date.year,
+          bookingTime: props.date.hour,
           online: data.online,
           userId: props.user.id,
           capacity: data.capacity,
@@ -109,17 +124,18 @@ const NewEvent = (props) => {
         { withCredentials: true }
       )
       .then((response) => {
-        console.log(response);
-        if (response.status === 200) {
-          if (response.data.message != "Authentication Successful") {
-            return setError(response.data.message);
-          }
-        } else {
-          console.log(response);
-        }
+        props.onCompleted();
       })
       .catch((e) => console.log(e));
   };
+
+  const options = courseList.map((item) => {
+    return {
+      label: item.name,
+      value: item.id,
+      capacity: item.capacity,
+    };
+  });
 
   return (
     <Modal
@@ -147,14 +163,20 @@ const NewEvent = (props) => {
           <Form className="login-form">
             <Form.Group className="pt-3 mb-3">
               <Form.Label>Course </Form.Label>
-              <Form.Select id="course" onChange={handleChange}></Form.Select>
+
+              <Select
+                id="course"
+                className="select"
+                options={options}
+                onChange={handleChangeSelect}
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Capacity</Form.Label>
               <Form.Control
                 type="number"
                 min="1"
-                max="20"
+                max={max}
                 id="capacity"
                 onKeyDown={onKeyDown}
                 onChange={handleChange}
@@ -162,12 +184,7 @@ const NewEvent = (props) => {
             </Form.Group>
             <Form.Group>
               <Form.Label>Online</Form.Label>
-              <Form.Check
-                type="checkbox"
-                id="online"
-                defaultValue={false}
-                onChange={handleChange}
-              />
+              <Form.Check type="checkbox" id="online" onChange={handleChange} />
             </Form.Group>
           </Form>
         </Modal.Body>

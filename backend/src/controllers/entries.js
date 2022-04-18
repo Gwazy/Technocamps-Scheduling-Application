@@ -1,8 +1,93 @@
 const status = require("http-status");
+const { google } = require("googleapis");
 
 const { Entries, User } = require("../models");
 const entriesModel = Entries;
 const has = require("has-keys");
+
+const { OAuth2 } = google.auth;
+
+const oAuth2Client = new OAuth2(
+  "1082791465711-ovbo4th4pc4eg02galpvb4ciutccb3p3.apps.googleusercontent.com",
+  "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"
+);
+
+oAuth2Client.setCredentials({
+  refresh_token:
+    "1//04LYDPPLOFbvOCgYIARAAGAQSNwF-L9Ir2ZLKb6gRp9pJPWfOFQ5PYL8h1HhJXQ3KSQ-8DGfIUiuXVxd2mpy5he5KUTUmug4y58U",
+});
+
+const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
+
+async function insertEvent(
+  postid,
+  name,
+  bookingDate,
+  bookingTime,
+  online,
+  capacity,
+  user_id
+) {
+  let startDateTime = new Date(bookingDate);
+  startDateTime.setHours(bookingTime);
+  let endDateTime = new Date(bookingDate);
+  endDateTime.setHours(bookingTime + 1);
+
+  const event = {
+    summary: name,
+    colorId: 1,
+    description:
+      '{"user_id" : "' +
+      user_id +
+      '","capacity":"' +
+      capacity +
+      '","online":"' +
+      online +
+      '"}',
+    start: { dateTime: startDateTime, timeZone: "Europe/London" },
+    end: { dateTime: endDateTime, timeZone: "Europe/London" },
+  };
+
+  calendar.freebusy.query(
+    {
+      resource: {
+        timeMin: startDateTime,
+        timeMax: endDateTime,
+        timeZone: "Europe/London",
+
+        items: [{ id: "primary" }],
+      },
+    },
+    (err, res) => {
+      //  CHNAGE THIS FUNCTION
+      if (err) return console.error("Free Busy Query Error: ", err);
+
+      const eventArr = res.data.calendars.primary.busy;
+
+      // Check if event array is empty which means we are not busy
+      if (eventArr.length === 0)
+        return calendar.events.insert(
+          { calendarId: "primary", resource: event },
+          (err, result) => {
+            if (err) {
+              return console.error("Error Creating Calender Event:", err);
+            }
+
+            console.log(result.data.id);
+            appendCalendarId(result.data.id, postid);
+            return console.log("Calendar event successfully created.");
+          }
+        );
+
+      // If event array is not empty log that we are busy.
+      return console.log(`Sorry I'm busy...`);
+    }
+  );
+}
+
+async function appendCalendarId(calendarId, id) {
+  entriesModel.update({ calendarId }, { where: { id } });
+}
 
 module.exports = {
   async getEntrieById(req, res) {
@@ -11,7 +96,7 @@ module.exports = {
 
     let { id } = req.params;
 
-    let data = await entriesModel.findOne({ where: { userId: id } });
+    let data = await entriesModel.findOne({ where: { id } });
 
     if (!data) throw { code: status.BAD_REQUEST, message: "Entries not found" };
 
@@ -30,40 +115,67 @@ module.exports = {
     res.json({ status: true, message: "Returning entries", data });
   },
   async newEntrie(req, res) {
-    console.log(req.body.online);
-    if (
-      !req.body.name ||
-      !req.body.bookingDate ||
-      !req.body.bookingTime ||
-      !req.body.userId ||
-      !req.body.capacity
-    )
-      throw {
-        code: status.BAD_REQUEST,
-        message: "Missing parameters",
-      };
-
-    let { name, bookingDate, bookingTime, online, userId, capacity } = req.body;
-
     try {
-      const user = await User.findOne({ where: { id: userId } });
+      if (
+        !req.body.name ||
+        !req.body.bookingDate ||
+        !req.body.bookingTime ||
+        !req.body.userId ||
+        !req.body.capacity
+      )
+        throw {
+          code: status.BAD_REQUEST,
+          message: "Missing parameters",
+        };
 
-      await entriesModel.create({
+      let {
         name,
         bookingDate,
         bookingTime,
         online,
+        userId,
         capacity,
-        userId: user.id,
-      });
-    } catch (error) {
-      throw {
-        code: status.BAD_REQUEST,
-        message: error,
-      };
-    }
+        calendarId,
+      } = req.body;
 
-    res.json({ status: true, message: "Successfully created entry" });
+      // bookingDateMoment = moment(bookingDate, "MM-DD-YYYY");
+
+      try {
+        const user = await User.findOne({ where: { id: userId } });
+
+        await entriesModel
+          .create({
+            name,
+            bookingDate,
+            bookingTime,
+            online,
+            capacity,
+            calendarId,
+            userId: user.id,
+          })
+          .then((response) => {
+            if (!response.dataValues.calendarId) {
+              insertEvent(
+                response.dataValues.id,
+                name,
+                bookingDate,
+                bookingTime,
+                online,
+                capacity,
+                userId
+              );
+            }
+          });
+      } catch (error) {
+        throw {
+          code: status.BAD_REQUEST,
+          message: error,
+        };
+      }
+      res.json({ status: true, message: "Successfully created entry" });
+    } catch (err) {
+      console.log(err);
+    }
   },
 
   async updateEntrie(req, res) {
@@ -72,9 +184,36 @@ module.exports = {
         code: status.BAD_REQUEST,
         message: "You must specify the id",
       };
-    let { id, pending, confirmation } = req.body;
+    let { id, name, capacity, pending, confirmation, online, userId } =
+      req.body;
 
-    await entriesModel.update({ pending, confirmation }, { where: { id } });
+    await entriesModel.update(
+      { name, capacity, pending, confirmation, online },
+      { where: { id } }
+    );
+
+    let data = await entriesModel.findOne({ where: { id } });
+
+    var event = calendar.events.get({
+      calendarId: "primary",
+      eventId: data.dataValues.calendarId,
+    });
+
+    event.description =
+      '{"user_id" : "' +
+      userId +
+      '","capacity":"' +
+      capacity +
+      '","online":"' +
+      online +
+      '"}';
+
+    calendar.events.patch({
+      calendarId: "primary",
+      eventId: data.dataValues.calendarId,
+      resource: event,
+    });
+
     res.json({ status: true, message: "Entrie updated" });
   },
 
@@ -83,7 +222,21 @@ module.exports = {
       throw { code: status.BAD_REQUEST, message: "You must specify the id" };
 
     let { id } = req.params;
+    let data = await entriesModel.findOne({ where: { id } });
+
+    calendar.events.delete({
+      calendarId: "primary",
+      eventId: data.dataValues.calendarId,
+    });
+
     await entriesModel.destroy({ where: { id } });
     res.json({ status: true, message: "Entrie deleted" });
+  },
+
+  async destroy() {
+    Entries.destroy({
+      where: {},
+      truncate: true,
+    });
   },
 };

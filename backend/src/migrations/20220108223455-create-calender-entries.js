@@ -23,6 +23,9 @@ module.exports = {
       online: {
         type: Sequelize.BOOLEAN,
       },
+      calendarID: {
+        type: Sequelize.STRING,
+      },
       confirmation: {
         type: Sequelize.BOOLEAN,
       },

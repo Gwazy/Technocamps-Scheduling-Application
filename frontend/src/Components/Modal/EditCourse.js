@@ -26,6 +26,10 @@ const EditCourse = (props) => {
 
   const onKeyDownNumerical = async (e) => {
     const re = /^[0-9\b]+$/;
+
+    if (e.key == "Backspace") {
+      return;
+    }
     if (!re.test(e.key)) {
       e.preventDefault();
     }

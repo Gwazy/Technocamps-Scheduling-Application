@@ -8,7 +8,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const helmet = require("helmet");
-
+const google = require("./googleCalendar/index");
 const logger = require("./util/logger");
 const { sequelize } = require("./models");
 
@@ -75,11 +75,13 @@ app.use("*", (req, res) => {
 
 const assertDatabaseConnection = async () => {
   console.log("Checking database connection...");
-
   try {
     // await sequelize.sync({ force: true });
+
     await sequelize.authenticate();
-    console.log("Database connection successful !");
+    await google
+      .synchronise()
+      .then(console.log("Database connection successful !"));
   } catch (error) {
     console.log("Unable to connect to the database");
     console.log(error.message);

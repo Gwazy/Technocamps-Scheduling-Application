@@ -23,44 +23,43 @@ const Register = () => {
   const navigate = useNavigate();
   const [error, setError] = useState([]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError([]);
     validateInputFields();
-    if (error.length === 0) {
-      axios
-        .post(
-          backendApi + "/register",
-          {
-            username: data.username,
-            emailaddress: data.emailaddress,
-            firstname: data.firstname,
-            surname: data.surname,
-            address: data.address,
-            postcode: data.postcode,
-            phonenumber: data.phonenumber,
-            password: data.password,
-            isAdmin: "false",
-          },
-          { withCredentials: true }
-        )
-        .then((response) => {
-          console.log(response.status);
 
-          if (response.status === 200) {
-            navigate("/");
-          }
-        })
-        .catch((err) => {
-          for (let e of err.response.data.message) {
-            setError((err) => [...err, e]);
-          }
-          console.log(error);
-        });
-    }
+    axios
+      .post(
+        backendApi + "/register",
+        {
+          username: data.username,
+          emailaddress: data.emailaddress,
+          firstname: data.firstname,
+          surname: data.surname,
+          address: data.address,
+          postcode: data.postcode,
+          phonenumber: data.phonenumber,
+          password: data.password,
+          isAdmin: "false",
+        },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        console.log(response.status);
+
+        if (response.status === 200) {
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        for (let e of err.response.data.message) {
+          setError((err) => [...err, e]);
+        }
+        console.log(error);
+      });
   };
 
-  const validateInputFields = async (_callback) => {
+  const validateInputFields = () => {
     if (data.username === "") {
       setError((err) => [...err, "No input for Username field"]);
     }
@@ -82,12 +81,15 @@ const Register = () => {
     if (data.password === "") {
       setError((err) => [...err, "No input for Password field"]);
     }
-
-    _callback();
   };
 
   const onKeyDownNumerical = async (e) => {
     const re = /^[0-9\b]+$/;
+    console.log(re.test(e.key));
+    console.log(e.key);
+    if (e.key == "Backspace") {
+      return;
+    }
     if (!re.test(e.key)) {
       e.preventDefault();
     }

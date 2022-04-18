@@ -19,6 +19,10 @@ const NewCourse = (props) => {
 
   const onKeyDownNumerical = async (e) => {
     const re = /^[0-9\b]+$/;
+
+    if (e.key == "Backspace") {
+      return;
+    }
     if (!re.test(e.key)) {
       e.preventDefault();
     }
@@ -59,7 +63,7 @@ const NewCourse = (props) => {
       .then((response) => {
         console.log(response);
         if (response.status === 200) {
-          props.onHide();
+          props.onCompleted();
         }
       })
       .catch((err) => console.log(err));
