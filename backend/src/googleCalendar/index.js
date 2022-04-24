@@ -1,6 +1,7 @@
 const { google } = require("googleapis");
 
 const { Entries } = require("../models");
+entriesModel = Entries;
 const entries = require("../controllers/entries.js");
 
 const { OAuth2 } = google.auth;
@@ -12,7 +13,7 @@ const oAuth2Client = new OAuth2(
 
 oAuth2Client.setCredentials({
   refresh_token:
-    "1//04LYDPPLOFbvOCgYIARAAGAQSNwF-L9Ir2ZLKb6gRp9pJPWfOFQ5PYL8h1HhJXQ3KSQ-8DGfIUiuXVxd2mpy5he5KUTUmug4y58U",
+    "1//041L_LnW4rR6_CgYIARAAGAQSNwF-L9IrJ0FYKuPy81QF5v48tyFdg41zj6zivIcll0nyAVCMQRGTpfbjih0cbFSSiJ6qavsJMNo",
 });
 
 const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
@@ -37,7 +38,7 @@ async function listEvents(callback) {
   calendar.events.list(
     {
       calendarId: "primary",
-      maxResults: 1000,
+      maxResults: 10000,
       singleEvents: true,
       orderBy: "startTime",
     },
@@ -57,7 +58,7 @@ module.exports = {
   async synchronise() {
     numberOfEntries((response) => {
       if (response > 0) {
-        Entries.sync({ force: true }).then(() => {
+        {
           listEvents((response) => {
             for (let element in response) {
               let courseName = response[element].summary;
@@ -72,60 +73,76 @@ module.exports = {
                 jsonObj = false;
               }
 
-              console.log(id);
-              if (jsonObj.user_id && jsonObj.capacity && jsonObj.online) {
-                try {
-                  entries.newEntrie({
-                    body: {
-                      name: courseName,
-                      bookingDate:
-                        start.getMonth() +
-                        1 +
-                        "/" +
-                        start.getDate() +
-                        "/" +
-                        start.getFullYear(),
-                      bookingTime: start.getHours(),
-                      online: jsonObj.online,
-                      calendarId: id,
-                      capacity: jsonObj.capacity,
-                      userId: jsonObj.user_id,
-                      startUpSync: true,
-                    },
-                  });
-                } catch (err) {
-                  console.log(err);
-                }
-              } else {
-                console.log(
-                  "Detected non-Calendar generated event " + courseName
-                );
-                try {
-                  entries.newEntrie({
-                    body: {
-                      name: "Imported Event",
-                      bookingDate:
-                        start.getMonth() +
-                        1 +
-                        "/" +
-                        start.getDate() +
-                        "/" +
-                        start.getFullYear(),
-                      bookingTime: start.getHours(),
-                      online: false,
-                      calendarId: id,
-                      capacity: "0",
-                      userId: "1",
-                      startUpSync: true,
-                    },
-                  });
-                } catch (err) {
-                  console.log(err);
-                }
-              }
+              entriesModel
+                .findOne({ where: { calendarId: id } })
+                .then((response) => {
+                  if (!response) {
+                    console.log("Creating entry");
+                    if (
+                      jsonObj.user_id &&
+                      jsonObj.capacity &&
+                      jsonObj.online &&
+                      jsonObj.pending &&
+                      jsonObj.confirmation
+                    ) {
+                      try {
+                        entries.newEntrie({
+                          body: {
+                            name: courseName,
+                            bookingDate:
+                              start.getMonth() +
+                              1 +
+                              "/" +
+                              start.getDate() +
+                              "/" +
+                              start.getFullYear(),
+                            bookingTime: start.getHours(),
+                            online: jsonObj.online,
+                            calendarId: id,
+                            capacity: jsonObj.capacity,
+                            userId: jsonObj.user_id,
+                            pending: jsonObj.pending,
+                            confirmation: jsonObj.confirmation,
+                            startUpSync: true,
+                          },
+                        });
+                      } catch (err) {
+                        console.log(err);
+                      }
+                    } else {
+                      console.log(
+                        "Detected non-Calendar generated event " + courseName
+                      );
+                      try {
+                        entries.newEntrie({
+                          body: {
+                            name: "Imported Event",
+                            bookingDate:
+                              start.getMonth() +
+                              1 +
+                              "/" +
+                              start.getDate() +
+                              "/" +
+                              start.getFullYear(),
+                            bookingTime: start.getHours(),
+                            online: false,
+                            calendarId: id,
+                            capacity: "0",
+                            userId: "1",
+                            pending: false,
+                            confirmation: true,
+                          },
+                        });
+                      } catch (err) {
+                        console.log(err);
+                      }
+                    }
+                  }
+                });
+              console.log("Entry already exists!");
             }
           });
-        });
+        }
       } else {
         console.log("No synchronisation is required!");
       }

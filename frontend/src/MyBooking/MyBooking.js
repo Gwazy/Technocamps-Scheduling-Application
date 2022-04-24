@@ -10,20 +10,28 @@ import {
   ButtonToolbar,
   Alert,
 } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 import EditEvent from "../Components/Modal/EditEvent";
+import Details from "../Components/Modal/Details";
 
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
 const MyBooking = (props) => {
   const [modalShow, setModalShow] = useState(false);
+  const [modalShowDetails, setModalShowDetails] = useState(false);
+  const [entrieName, setEntrieName] = useState("");
   const [data, setData] = useState([]);
   const [toggle, setToggle] = useState(true);
   const [entrieToEdit, setEntrieToEdit] = useState(1);
   const [completed, setCompleted] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const didMount = useRef(false);
+  const navigate = useNavigate();
+
+  if (props.user === undefined || props.user === null || props.user === false) {
+    navigate("/unauthorized");
+  }
 
   useEffect(() => {
     if (didMount) {
@@ -68,22 +76,12 @@ const MyBooking = (props) => {
   }, [deleted]);
 
   const onClickEdit = (entrie) => (e) => {
-    console.log(entrie);
     setEntrieToEdit(entrie.id);
     setModalShow(true);
   };
-
-  const onCompletedEvent = () => {
-    setCompleted(true);
-    setModalShow(false);
-
-    setToggle(!toggle);
-  };
-
-  const onHideClick = () => {
-    setModalShow(false);
-    setEntrieToEdit(false);
-    setToggle(!toggle);
+  const onClickDetails = (entrie) => (e) => {
+    setEntrieName(entrie.name);
+    setModalShowDetails(true);
   };
 
   const onClickDelete = (entrie) => (e) => {
@@ -96,6 +94,20 @@ const MyBooking = (props) => {
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  const onHideClick = () => {
+    setModalShow(false);
+    setEntrieToEdit(false);
+    setModalShowDetails(false);
+    setToggle(!toggle);
+  };
+
+  const onCompletedEvent = () => {
+    setCompleted(true);
+    setModalShow(false);
+
+    setToggle(!toggle);
   };
 
   const SuccessMessage = () => {
@@ -130,6 +142,7 @@ const MyBooking = (props) => {
 
   const renderEntrie = data
     .filter((entrie) => {
+      console.log(props.user.id);
       return entrie.userId === props.user.id;
     })
     .map((entrie) => (
@@ -148,8 +161,8 @@ const MyBooking = (props) => {
               <Col className="justify-content-center mt-5 ">
                 <ButtonToolbar className="mx-2 float-end">
                   <ButtonGroup className="me-2">
-                    <Button variant="primary" onClick={onClickDelete(entrie)}>
-                      Details (Need to complete)
+                    <Button variant="primary" onClick={onClickDetails(entrie)}>
+                      Details
                     </Button>
                   </ButtonGroup>
                   <ButtonGroup className="me-2">
@@ -178,6 +191,12 @@ const MyBooking = (props) => {
       <SuccessMessage></SuccessMessage>
       <DeletedMessage></DeletedMessage>
       {renderEntrie}
+
+      <Details
+        event={entrieName}
+        show={modalShowDetails}
+        onHide={() => onHideClick()}
+      ></Details>
       <EditEvent
         event={entrieToEdit}
         show={modalShow}

@@ -7,7 +7,7 @@ import "./Register.scss";
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
-const Register = () => {
+const Register = (props) => {
   const [data, setData] = useState({
     username: "",
     emailaddress: "",
@@ -22,6 +22,10 @@ const Register = () => {
 
   const navigate = useNavigate();
   const [error, setError] = useState([]);
+
+  if (props.user) {
+    navigate("/");
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -155,7 +159,7 @@ const Register = () => {
           ></Form.Control>
 
           <Form.Text className="text-muted ">
-            We'll never share your email with anyone else.
+            We will not share your email address with anyone else.
           </Form.Text>
         </Form.Group>
         <Form.Group>

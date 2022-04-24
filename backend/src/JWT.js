@@ -5,7 +5,6 @@ const createTokens = (user) => {
     { username: user.username, id: user.id, isAdmin: user.isAdmin },
     process.env.SECRET
   );
-
   return accessToken;
 };
 

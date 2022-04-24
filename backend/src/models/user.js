@@ -2,8 +2,10 @@
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    static associate({ Entries }) {
-      // this.hasMany(Entries, { foreignKey: "userId", as: "entries" });
+    static associate({ Entries, Schedule }) {
+      this.hasMany(Entries, { foreignKey: "userId" });
+      // this.hasOne(Schedule, {foreignKey: "userId"})
+      this.hasMany(Schedule, { foreignKey: "userId" });
     }
   }
   User.init(
@@ -44,6 +46,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      isStaff: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },

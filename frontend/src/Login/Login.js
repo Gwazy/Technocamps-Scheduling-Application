@@ -15,6 +15,10 @@ const Login = (props) => {
   });
   const navigate = useNavigate();
 
+  if (props.user) {
+    navigate("/");
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
 

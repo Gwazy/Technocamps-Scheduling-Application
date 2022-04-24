@@ -68,17 +68,10 @@ const EditCourse = (props) => {
 
     if (id === "capacity") {
       if (re.test(value)) {
-        if (value > max) {
-          setEvent((data) => ({
-            ...data,
-            [id]: max,
-          }));
-        } else {
-          setEvent((data) => ({
-            ...data,
-            [id]: value,
-          }));
-        }
+        setEvent((data) => ({
+          ...data,
+          capacity: value,
+        }));
       }
     } else {
       setEvent((data) => ({
@@ -100,7 +93,11 @@ const EditCourse = (props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(event.capacity);
+    if (Number(event.capacity) > max) {
+      event.capacity = max;
+      console.log(event.capacity);
+    }
     axios
       .put(backendApi + "/entries", event)
       .then((response) => {

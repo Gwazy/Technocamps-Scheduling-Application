@@ -11,14 +11,14 @@ module.exports = {
 
     let { id } = req.params;
 
-    let data = await userModel.findOne({ where: { id }, include: "entries" });
+    let data = await userModel.findOne({ where: { id }, include: [Entries] });
 
     if (!data) throw { code: status.BAD_REQUEST, message: "User not found" };
 
     res.json({ status: true, message: "Returning User", data });
   },
   async getUsers(req, res) {
-    let data = await userModel.findAll({ include: [entries] });
+    let data = await userModel.findAll({ include: [Entries] });
 
     res.json({ status: true, message: "Returning users", data });
   },

@@ -73,17 +73,10 @@ const NewEvent = (props) => {
 
     if (id === "capacity") {
       if (re.test(value)) {
-        if (value > max) {
-          setData((data) => ({
-            ...data,
-            [id]: max,
-          }));
-        } else {
-          setData((data) => ({
-            ...data,
-            [id]: value,
-          }));
-        }
+        setData((data) => ({
+          ...data,
+          capacity: value,
+        }));
       }
     } else {
       setData((data) => ({
@@ -109,6 +102,11 @@ const NewEvent = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (Number(data.capacity) > max) {
+      data.capacity = max;
+      console.log(data.capacity);
+    }
+
     axios
       .post(
         backendApi + "/entries",
@@ -124,6 +122,7 @@ const NewEvent = (props) => {
         { withCredentials: true }
       )
       .then((response) => {
+        console.log(props.user.id);
         props.onCompleted();
       })
       .catch((e) => console.log(e));

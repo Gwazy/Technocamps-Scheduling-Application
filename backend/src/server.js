@@ -77,7 +77,6 @@ const assertDatabaseConnection = async () => {
   console.log("Checking database connection...");
   try {
     // await sequelize.sync({ force: true });
-
     await sequelize.authenticate();
     await google
       .synchronise()

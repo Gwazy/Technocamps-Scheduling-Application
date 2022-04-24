@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@mui/material";
 import { Scheduler } from "@aldabil/react-scheduler";
-import { EVENTS } from "./events";
+
 import NewEvent from "../Components/Modal/NewEvent";
 import { Alert, Container } from "react-bootstrap";
 const axios = require("axios");
@@ -114,7 +114,6 @@ const Calender = (props) => {
           selectedDate={currentDate}
           view="week"
           month={null}
-          events={EVENTS}
           day={null}
           week={{
             weekDays: [0, 1, 2, 3, 4],
@@ -135,7 +134,7 @@ const Calender = (props) => {
                     background: disabled ? "#E5E5E5" : "transparent",
                   }}
                   onClick={() => {
-                    if (!disabled) {
+                    if (!disabled && props.user.isAdmin === false) {
                       setDate({
                         day: day.getDate(),
                         month: day.getMonth(),

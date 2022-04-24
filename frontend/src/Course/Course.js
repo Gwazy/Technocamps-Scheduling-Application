@@ -10,12 +10,13 @@ import {
   Alert,
 } from "react-bootstrap";
 import NewCourse from "../Components/Modal/NewCourse";
+import { useNavigate } from "react-router-dom";
 import EditCourse from "../Components/Modal/EditCourse";
 
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
 
-const Course = () => {
+const Course = (props) => {
   const [modalShow, setModalShow] = useState(false);
   const [editModalShow, setEditModalShow] = useState(false);
   const [data, setData] = useState([]);
@@ -23,6 +24,12 @@ const Course = () => {
   const [courseToEdit, setCourseToEdit] = useState(1);
   const [completed, setCompleted] = useState(false);
   const didMount = useRef(false);
+
+  const navigate = useNavigate();
+
+  if (props.user === undefined || props.user === null || props.user === false) {
+    navigate("/unauthorized");
+  }
 
   useEffect(() => {
     if (didMount) {

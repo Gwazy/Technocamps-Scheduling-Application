@@ -14,7 +14,7 @@ const oAuth2Client = new OAuth2(
 
 oAuth2Client.setCredentials({
   refresh_token:
-    "1//04LYDPPLOFbvOCgYIARAAGAQSNwF-L9Ir2ZLKb6gRp9pJPWfOFQ5PYL8h1HhJXQ3KSQ-8DGfIUiuXVxd2mpy5he5KUTUmug4y58U",
+    "1//041L_LnW4rR6_CgYIARAAGAQSNwF-L9IrJ0FYKuPy81QF5v48tyFdg41zj6zivIcll0nyAVCMQRGTpfbjih0cbFSSiJ6qavsJMNo",
 });
 
 const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
@@ -26,7 +26,9 @@ async function insertEvent(
   bookingTime,
   online,
   capacity,
-  user_id
+  user_id,
+  pending,
+  confirmation
 ) {
   let startDateTime = new Date(bookingDate);
   startDateTime.setHours(bookingTime);
@@ -43,6 +45,10 @@ async function insertEvent(
       capacity +
       '","online":"' +
       online +
+      '","pending":"' +
+      pending +
+      '","confirmation":"' +
+      confirmation +
       '"}',
     start: { dateTime: startDateTime, timeZone: "Europe/London" },
     end: { dateTime: endDateTime, timeZone: "Europe/London" },
@@ -136,6 +142,8 @@ module.exports = {
         userId,
         capacity,
         calendarId,
+        pending,
+        confirmation,
       } = req.body;
 
       // bookingDateMoment = moment(bookingDate, "MM-DD-YYYY");
@@ -152,6 +160,8 @@ module.exports = {
             capacity,
             calendarId,
             userId: user.id,
+            pending,
+            confirmation,
           })
           .then((response) => {
             if (!response.dataValues.calendarId) {
@@ -162,7 +172,9 @@ module.exports = {
                 bookingTime,
                 online,
                 capacity,
-                userId
+                userId,
+                response.pending,
+                response.confirmation
               );
             }
           });
@@ -206,6 +218,10 @@ module.exports = {
       capacity +
       '","online":"' +
       online +
+      '","pending":"' +
+      pending +
+      '","confirmation":"' +
+      confirmation +
       '"}';
 
     calendar.events.patch({

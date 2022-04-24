@@ -10,6 +10,8 @@ router.use(require("./user"));
 
 router.use(require("./entries"));
 
+router.use(require("./schedule"));
+
 // External API routes
 
 // router.use(require("./googlecalendar"));

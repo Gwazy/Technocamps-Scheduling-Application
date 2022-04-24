@@ -32,6 +32,7 @@ module.exports = {
       phonenumber,
       password,
       isAdmin,
+      isStaff,
     } = req.body;
 
     // Validation
@@ -60,21 +61,21 @@ module.exports = {
     }
 
     try {
-      let re = /^[0-9\b]+$/;
-      if (!re.test(phonenumber)) {
-        error.push("Please enter a valid phone number!");
-      }
-    } catch (err) {
-      error.push("Please enter a valid phone number!");
-    }
-
-    try {
       let re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
       if (!re.test(emailaddress)) {
         error.push("Please enter a valid email address!");
       }
     } catch (err) {
       error.push("Please enter a valid email address!");
+    }
+
+    try {
+      let re = /^[0-9\b]+$/;
+      if (!re.test(phonenumber)) {
+        error.push("Please enter a valid phone number!");
+      }
+    } catch (err) {
+      error.push("Please enter a valid phone number!");
     }
 
     if (error.length != 0) {
@@ -96,6 +97,7 @@ module.exports = {
           phonenumber,
           password,
           isAdmin,
+          isStaff,
         });
         res.json({ status: true, message: "Successfully created user" });
       } catch (error) {
@@ -152,10 +154,11 @@ module.exports = {
     });
   },
 
-  //  Rewrites the JWT to expire immediately
   async logout(req, res) {
     const accessToken = req.cookies["access-token"];
+    //  Rewrites the JWT to expire immediately
     res.cookie("access-token", accessToken, { maxAge: 1 });
+
     res.json({
       accessToken: accessToken,
     });

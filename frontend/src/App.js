@@ -10,6 +10,8 @@ import Navbar from "./Navbar/Navbar";
 import Course from "./Course/Course";
 import Booking from "./Booking/Booking";
 import MyBooking from "./MyBooking/MyBooking";
+import Unauthorized from "./Unauthorized/Unauthorized";
+import NotFound from "./NotFound/NotFound";
 
 const axios = require("axios");
 const backendApi = "http://localhost:8000/api";
@@ -30,6 +32,8 @@ function App() {
             id: response.data.id,
             isAdmin: response.data.isAdmin,
           });
+        } else {
+          setUser({});
         }
       })
       .catch((error) => {
@@ -37,21 +41,29 @@ function App() {
       });
   }, []);
 
+  {
+    /* <Route exact path="/profile"></Route> Should be able to see their profile, and update details*/
+  }
   return (
     <Router>
       <Navbar user={user}></Navbar>
       <Routes>
         <Route exact path="/" element={<Home user={user} />}></Route>
-        <Route exact path="/login" element={<Login />}></Route>
-        <Route exact path="/register" element={<Register />}></Route>
-        <Route exact path="/course" element={<Course />}></Route>
-        <Route exact path="/bookings" element={<Booking />}></Route>
+        <Route exact path="/login" element={<Login user={user} />}></Route>
+        <Route
+          exact
+          path="/register"
+          element={<Register user={user} />}
+        ></Route>
+        <Route exact path="/course" element={<Course user={user} />}></Route>
+        <Route exact path="/bookings" element={<Booking user={user} />}></Route>
         <Route
           exact
           path="/mybooking"
           element={<MyBooking user={user} />}
         ></Route>
-        {/* <Route exact path="/profile"></Route> Should be able to see their profile, and update details*/}
+        <Route exact path="/unauthorized" element={<Unauthorized />}></Route>
+        <Route exact path="*" element={<NotFound />}></Route>
       </Routes>
     </Router>
   );
