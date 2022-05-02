@@ -73,6 +73,17 @@ const Booking = (props) => {
       .catch((error) => console.log(error));
   };
 
+  const scheduleOnClick = () => (e) => {
+    axios
+      .get(backendApi + "/schedules/autoschedule")
+      .then((response) => {
+        console.log("Complete");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const onHideClick = () => {
     setModalShow(false);
     setModalShowInformation(false);
@@ -214,7 +225,9 @@ const Booking = (props) => {
           </Button>
         </ButtonGroup>
       </ButtonToolbar>
-      <Button className="mt-1 mb-3">Auto Schedule</Button>
+      <Button className="mt-1 mb-3" onClick={scheduleOnClick()}>
+        Auto Schedule
+      </Button>
 
       <div className="mb-5">
         <h2>{selected}</h2>
