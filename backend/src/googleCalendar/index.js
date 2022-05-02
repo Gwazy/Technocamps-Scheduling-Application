@@ -13,7 +13,7 @@ const oAuth2Client = new OAuth2(
 
 oAuth2Client.setCredentials({
   refresh_token:
-    "1//041L_LnW4rR6_CgYIARAAGAQSNwF-L9IrJ0FYKuPy81QF5v48tyFdg41zj6zivIcll0nyAVCMQRGTpfbjih0cbFSSiJ6qavsJMNo",
+    "1//047-Cop-FNpypCgYIARAAGAQSNwF-L9IrFHIFniBBcrK0B9PPzQQ7i3XzuueZQ7sy4aX7HdCwsyGz5AFZdNsjaljfBxYlaExGZ6o",
 });
 
 const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
@@ -22,7 +22,6 @@ async function numberOfEntries(callback) {
   calendar.events
     .list({
       calendarId: "primary",
-
       singleEvents: true,
       orderBy: "startTime",
     })

@@ -214,7 +214,7 @@ const Booking = (props) => {
           </Button>
         </ButtonGroup>
       </ButtonToolbar>
-      <Button className="mt-1 mb-3">Button</Button>
+      <Button className="mt-1 mb-3">Auto Schedule</Button>
 
       <div className="mb-5">
         <h2>{selected}</h2>

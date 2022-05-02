@@ -49,6 +49,7 @@ module.exports = {
     await scheduleModel.fineOne({ where: { entriesId: id } });
   },
   async autoSchedule(req, res) {
+    //  Assigning a list of values from the follow sequelize promosies
     const AllPendingEntries = await entriesModel.findAll({
       where: { pending: true },
     });
@@ -56,6 +57,7 @@ module.exports = {
 
     for (var i of AllPendingEntries) {
       for (var j of allStaff) {
+        // Constructs a sequelize promise
         await scheduleModel
           .findAll({
             include: [
@@ -63,6 +65,7 @@ module.exports = {
                 model: Entries,
                 where: {
                   bookingDate: i.dataValues.bookingDate,
+                  //  Getting entries for a set period of times
                   [Sequelize.Op.or]: [
                     { bookingTime: i.dataValues.bookingTime },
                     {
@@ -86,13 +89,13 @@ module.exports = {
                   ],
                 },
               },
+              //  Ensuring that all values have the specific worker
               { model: User, where: { id: j.dataValues.id } },
             ],
           })
           .then((response) => {
-            console.log(response.length);
             if (response.length === 0) {
-              // Otherwise is busy
+              // Otherwise pass
               entries.updateEntrie({
                 body: {
                   id: i.dataValues.id,
@@ -109,7 +112,8 @@ module.exports = {
       }
     }
 
-    checking = await entriesModel.findAll({
+    //
+    const checking = await entriesModel.findAll({
       where: { pending: true },
     });
 

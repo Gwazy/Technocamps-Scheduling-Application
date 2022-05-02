@@ -156,27 +156,47 @@ const MyBooking = (props) => {
                 <div>Time : {entrie.bookingTime}</div>
                 <div>Capacity : {entrie.capacity}</div>
                 <div>Online : {String(entrie.online)}</div>
-                <div>Pending Confirmation : {String(entrie.pending)}</div>
+                {entrie.pending ? (
+                  <div>Pending : Pending confirmation</div>
+                ) : (
+                  <div>
+                    {entrie.confirmation ? (
+                      <div>Confirmation : Confirmed</div>
+                    ) : (
+                      <div>
+                        Confirmation : Rejected, please reschedule for different
+                        date
+                      </div>
+                    )}
+                  </div>
+                )}
               </Col>
-              <Col className="justify-content-center mt-5 ">
-                <ButtonToolbar className="mx-2 float-end">
-                  <ButtonGroup className="me-2">
-                    <Button variant="primary" onClick={onClickDetails(entrie)}>
-                      Details
-                    </Button>
-                  </ButtonGroup>
-                  <ButtonGroup className="me-2">
-                    <Button variant="primary" onClick={onClickEdit(entrie)}>
-                      Edit
-                    </Button>
-                  </ButtonGroup>
-                  <ButtonGroup className="me-2">
-                    <Button variant="danger" onClick={onClickDelete(entrie)}>
-                      Delete
-                    </Button>
-                  </ButtonGroup>
-                </ButtonToolbar>
-              </Col>
+              {entrie.confirmation ? (
+                <Col className="justify-content-center mt-5 ">
+                  <ButtonToolbar className="mx-2 float-end">
+                    <ButtonGroup className="me-2">
+                      <Button
+                        variant="primary"
+                        onClick={onClickDetails(entrie)}
+                      >
+                        Details
+                      </Button>
+                    </ButtonGroup>
+                    <ButtonGroup className="me-2">
+                      <Button variant="primary" onClick={onClickEdit(entrie)}>
+                        Edit
+                      </Button>
+                    </ButtonGroup>
+                    <ButtonGroup className="me-2">
+                      <Button variant="danger" onClick={onClickDelete(entrie)}>
+                        Delete
+                      </Button>
+                    </ButtonGroup>
+                  </ButtonToolbar>
+                </Col>
+              ) : (
+                <Col></Col>
+              )}
             </Row>
           </Form>
         </Container>

@@ -79,7 +79,7 @@ const Register = (props) => {
     if (data.address === "") {
       setError((err) => [...err, "No input for Address field"]);
     }
-    if (data.emailaddress === "") {
+    if (data.phonenumber === "") {
       setError((err) => [...err, "No input for Phone Number"]);
     }
     if (data.password === "") {
